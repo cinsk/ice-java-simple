@@ -1,0 +1,159 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.samsung.paas</groupId>
+  <artifactId>ice-java-simple</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <name>ice-java-simple</name>
+
+  <repositories>
+    <repository>
+      <id>CloudPi Repository</id>
+      <url>http://maven.samsungcloud.org/nexus/content/groups/public</url>
+    </repository>
+  </repositories>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <ice.include.path>/opt/Ice-3.4.2/slice/Ice</ice.include.path>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.zeroc</groupId>
+      <artifactId>ice</artifactId>
+      <version>3.4.2</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>1.7</version>
+        <executions>
+          <execution>
+            <id>slice</id>
+            <phase>generate-sources</phase>
+            <configuration>
+              <target name="slice2java">
+                <mkdir dir="src/generated/java"/>
+                <taskdef name="slice2java" classname="Slice2JavaTask"
+                         classpathref="maven.plugin.classpath" />
+                <slice2java outputdir="src/generated/java">
+                  <fileset dir="src/main/resources" includes="*.ice" />
+                  <includepath>
+                    <pathelement path="${ice.include.path}" />
+                  </includepath>
+                </slice2java>
+              </target>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>remove-dir</id>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <phase>clean</phase>
+            <configuration>
+              <tasks>
+                <delete dir="src/generated/java"/>
+              </tasks>
+            </configuration>
+          </execution>
+        </executions>
+        <dependencies>
+          <dependency>
+            <groupId>com.zeroc</groupId>
+            <artifactId>ant-ice</artifactId>
+            <version>3.4.2</version>
+          </dependency>
+        </dependencies>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>2.3.1</version>
+        <configuration>
+          <source>1.6</source>
+          <target>1.6</target>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>2.4</version>
+        <executions>
+          <execution>
+            <id>make-a-jar</id>
+            <phase>compile</phase>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <configuration>
+          <archive>
+            <manifest>
+              <mainClass>com.samsung.paas.SedisApp</mainClass>
+            </manifest>
+          </archive>
+          <descriptorRefs>
+            <descriptorRef>jar-with-dependencies</descriptorRef>
+          </descriptorRefs>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>1.2.1</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>java</goal>
+            </goals>
+          </execution>
+        </executions>
+        <!--
+        <configuration>
+          <mainClass>com.samsung.paas.SedisServerApp</mainClass>
+          <arguments>  
+            <argument>-properties</argument>  
+            <argument>config/config.properties</argument>  
+          </arguments>
+        </configuration>-->
+      </plugin>
+
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>1.7</version>
+        <executions>
+          <execution>
+            <id>add-source</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>add-source</goal>
+            </goals>
+            <configuration>
+              <sources>
+                <source>src/generated/java</source>
+                <source>src/maingenerated/java</source>
+              </sources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>
